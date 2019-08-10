@@ -77,21 +77,6 @@ class GameInstance {
                 if (command.protocol.name === 'MoveCommand') {
                     entity.processMove(command)                    
                 }
-
-                if (command.protocol.name === 'FireCommand') {
-                    if (entity.fire()) {
-
-                        this.entities.forEach(potentialVictim => {
-                            const hit = this.collisionSystem.checkLineCircle(entity.x, entity.y, command.x, command.y, potentialVictim.collider)
-                            // if the line intersects a player other than the shooter
-                            if (hit && potentialVictim.nid !== entity.nid) {
-                                potentialVictim.takeDamage(25)
-                            }
-                        })
-
-                        this.instance.addLocalMessage(new WeaponFired(entity.nid, entity.x, entity.y, command.x, command.y))
-                    }
-                }
             }
         }
 

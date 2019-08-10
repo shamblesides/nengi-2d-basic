@@ -67,9 +67,6 @@ const loop = function () {
                 bot.controls.delta
             )
 
-            if (Math.random() > 0.7) {
-                // bot.addCommand(new FireCommand(500, 500))
-            }
             //bot.addCommand(input)
             bot.update()
             bot.tick++

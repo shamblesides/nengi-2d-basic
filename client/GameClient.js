@@ -74,10 +74,6 @@ export default function makeClient() {
             rotation, delta
         ))
 
-        // if (input.mouseDown) {
-            // this.client.addCommand(new FireCommand(worldCoord.x, worldCoord.y))
-        // }
-
         // this.input.releaseKeys()
         client.update()
         /* * */
