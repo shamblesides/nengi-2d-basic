@@ -1,81 +1,88 @@
 import nengi from 'nengi'
 import nengiConfig from '../common/nengiConfig'
-import InputSystem from './InputSystem'
 import MoveCommand from '../common/command/MoveCommand'
-import FireCommand from '../common/command/FireCommand'
-import PIXIRenderer from './graphics/PIXIRenderer'
 
-class GameClient {
-    constructor() {
-        this.client = new nengi.Client(nengiConfig)
-        this.renderer = new PIXIRenderer()
-        this.input = new InputSystem()
+import { gridSheet } from 'pxcan';
 
-        this.client.onConnect(res => {
-            console.log('onConnect response:', res)
-        })
+const charaSrc = 'https://opengameart.org/sites/default/files/rpg_16x16_0.png';
+const playerSheet = gridSheet(charaSrc, 16, 16);
 
-        this.client.onClose(() => {
-            console.log('connection closed')
-        })
+export default function makeClient() {
+    const client = new nengi.Client(nengiConfig)
+    const stuff = {};
+    let myId = null;
 
-        this.client.connect('ws://localhost:8079')  
-    }
+    client.onConnect(res => {
+        console.log('onConnect response:', res)
+    })
 
-    update(delta, tick, now) {
+    client.onClose(() => {
+        console.log('connection closed')
+    })
+
+    client.connect('ws://localhost:8079')  
+
+    return function update(delta, { touches, buttons }) {
         /* receiving */
-        const network = this.client.readNetwork()
+        const network = client.readNetwork()
 
         network.entities.forEach(snapshot => {
             snapshot.createEntities.forEach(entity => {
-                this.renderer.createEntity(entity)
+                stuff[entity.nid] = entity;
             })
 
             snapshot.updateEntities.forEach(update => {
-                this.renderer.updateEntity(update)
+                stuff[update.nid][update.prop] = update.value;
             })
 
             snapshot.deleteEntities.forEach(nid => {
-                this.renderer.deleteEntity(nid)
+                delete stuff[nid];
             })
         })
 
         network.messages.forEach(message => {
-            this.renderer.processMessage(message)
+            if (message.protocol.name === 'Identity') {
+                myId = message.entityId
+                console.log('identified as', myId)
+            }
         })
 
         network.localMessages.forEach(localMessage => {
-            this.renderer.processLocalMessage(localMessage)
+            if (localMessage.protocol.name === 'WeaponFired') {
+                console.log('bang');
+                // this.drawHitscan(message.x, message.y, message.tx, message.ty, 0xff0000)
+            }
         })
         /* * */
 
         /* sending */
-        const input = this.input.frameState
+        // const input = this.input.frameState
 
         let rotation = 0
-        const worldCoord = this.renderer.toWorldCoordinates(this.input.currentState.mx, this.input.currentState.my)
+        // const worldCoord = this.renderer.toWorldCoordinates(, (touches[0] || {x:0}).y)
 
-        if (this.renderer.myEntity) {
+        if (myId) {
             // calculate the direction our character is facing
-            const dx = worldCoord.x - this.renderer.myEntity.x
-            const dy = worldCoord.y - this.renderer.myEntity.y
+            const dx = (touches[0] || {x:0}).x - 72;
+            const dy = (touches[0] || {y:0}).y - 72;
             rotation = Math.atan2(dy, dx)
         }
 
-        this.client.addCommand(new MoveCommand(input.w, input.a, input.s, input.d, rotation, delta))
+        client.addCommand(new MoveCommand(
+            buttons.up.pressed, buttons.left.pressed,
+            buttons.down.pressed, buttons.right.pressed,
+            rotation, delta
+        ))
 
-        if (input.mouseDown) {
-            this.client.addCommand(new FireCommand(worldCoord.x, worldCoord.y))
-        }
+        // if (input.mouseDown) {
+            // this.client.addCommand(new FireCommand(worldCoord.x, worldCoord.y))
+        // }
 
-        this.input.releaseKeys()
-        this.client.update()
+        // this.input.releaseKeys()
+        client.update()
         /* * */
 
-        /* rendering */
-        this.renderer.update(delta)
-        /* * */
+        return Object.values(stuff)
+            .map(g => playerSheet.sprite(0).at(g.x, g.y));
     }
 }
-
-export default GameClient

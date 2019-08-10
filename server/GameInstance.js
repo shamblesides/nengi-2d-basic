@@ -21,8 +21,8 @@ class GameInstance {
             // tell the client which entity it controls (the client will use this to follow it with the camera)
             this.instance.message(new Identity(entity.nid), client)
 
-            entity.x = Math.random() * 1000
-            entity.y = Math.random() * 1000
+            entity.x = Math.random() * 100 | 0,
+            entity.y = Math.random() * 100 | 0,
             // establish a relation between this entity and the client
             entity.client = client
             client.entity = entity
