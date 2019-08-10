@@ -3,67 +3,49 @@ import nengiConfig from '../common/nengiConfig'
 import PlayerCharacter from '../common/entity/PlayerCharacter'
 import Identity from '../common/message/Identity'
 
-class GameInstance {
-    constructor() {
-        this.entities = new Map()
-        // this.collisionSystem = new CollisionSystem()
-        this.instance = new nengi.Instance(nengiConfig, { port: 8079 })
-        this.instance.onConnect((client, clientData, callback) => {
-            //callback({ accepted: false, text: 'Connection denied.'})
+export default function createInstance() {
+    const entities = new Map()
+    // this.collisionSystem = new CollisionSystem()
+    const instance = new nengi.Instance(nengiConfig, { port: 8079 })
+    instance.onConnect((client, clientData, callback) => {
+        //callback({ accepted: false, text: 'Connection denied.'})
 
-            // create a entity for this client
-            const entity = new PlayerCharacter()
-            this.instance.addEntity(entity) // adding an entity to a nengi instance assigns it an id
+        // create a entity for this client
+        const entity = new PlayerCharacter()
+        instance.addEntity(entity) // adding an entity to a nengi instance assigns it an id
 
-            // tell the client which entity it controls (the client will use this to follow it with the camera)
-            this.instance.message(new Identity(entity.nid), client)
+        // tell the client which entity it controls (the client will use this to follow it with the camera)
+        instance.message(new Identity(entity.nid), client)
 
-            entity.x = Math.random() * 100 | 0,
-            entity.y = Math.random() * 100 | 0,
-            // establish a relation between this entity and the client
-            entity.client = client
-            client.entity = entity
+        entity.x = Math.random() * 100 | 0,
+        entity.y = Math.random() * 100 | 0,
+        // establish a relation between this entity and the client
+        entity.client = client
+        client.entity = entity
 
-            // define the view (the area of the game visible to this client, all else is culled)
-            client.view = {
-                x: entity.x,
-                y: entity.y,
-                halfWidth: 1000,
-                halfHeight: 1000
-            }
+        // define the view (the area of the game visible to this client, all else is culled)
+        client.view = {
+            x: entity.x,
+            y: entity.y,
+            halfWidth: 1000,
+            halfHeight: 1000
+        }
 
-            this.entities.set(entity.nid, entity)
+        entities.set(entity.nid, entity)
 
-            callback({ accepted: true, text: 'Welcome!' })
-        })
+        callback({ accepted: true, text: 'Welcome!' })
+    })
 
-        this.instance.onDisconnect(client => {
-            this.entities.delete(client.entity.nid)
-            this.instance.removeEntity(client.entity)
-        })
+    instance.onDisconnect(client => {
+        entities.delete(client.entity.nid)
+        instance.removeEntity(client.entity)
+    })
 
-
-        // for (var i = 0; i < 0; i++) {
-        //     this.spawnGreenCircle()
-        // }
-    }
-
-    // spawnGreenCircle() {
-    //     const green = new GreenCircle(
-    //         Math.random() * 1000,
-    //         Math.random() * 1000
-    //     )
-    //     // Order is important for the next two lines
-    //     this.instance.addEntity(green) // assigns an `nid` to green
-    //     this.entities.set(green.nid, green) // uses the `nid` as a key
-    // }
-
-    update(delta) {
+    return function update(delta) {
         //console.log('stats', this.entities.size, this.instance.clients.toArray().length, this.instance.entities.toArray().length)
-        this.acc += delta
 
         let cmd = null
-        while (cmd = this.instance.getNextCommand()) {
+        while (cmd = instance.getNextCommand()) {
             const tick = cmd.tick
             const client = cmd.client
 
@@ -90,7 +72,7 @@ class GameInstance {
         // })
 
         // TODO: the rest of the game logic
-        this.instance.clients.forEach(client => {
+        instance.clients.forEach(client => {
             client.view.x = client.entity.x
             client.view.y = client.entity.y
 
@@ -99,8 +81,6 @@ class GameInstance {
         })
 
         // when instance.updates, nengi sends out snapshots to every client
-        this.instance.update()
+        instance.update()
     }
 }
-
-export default GameInstance
