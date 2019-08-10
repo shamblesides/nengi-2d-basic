@@ -1,9 +1,7 @@
 import nengi from 'nengi'
 
 import PlayerCharacter from './entity/PlayerCharacter'
-import GreenCircle from './entity/GreenCircle'
 import Identity from './message/Identity'
-import WeaponFired from './message/WeaponFired'
 import MoveCommand from './command/MoveCommand'
 
 const config = {
@@ -21,13 +19,11 @@ const config = {
     protocols: {
         entities: [
             ['PlayerCharacter', PlayerCharacter],
-            ['GreenCircle', GreenCircle]
         ],
 
         localMessages: [],
         messages: [
             ['Identity', Identity],
-            ['WeaponFired', WeaponFired]
         ],
         commands: [
             ['MoveCommand', MoveCommand],

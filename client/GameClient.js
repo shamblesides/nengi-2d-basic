@@ -48,10 +48,10 @@ export default function makeClient() {
         })
 
         network.localMessages.forEach(localMessage => {
-            if (localMessage.protocol.name === 'WeaponFired') {
-                console.log('bang');
+            // if (localMessage.protocol.name === 'WeaponFired') {
+                // console.log('bang');
                 // this.drawHitscan(message.x, message.y, message.tx, message.ty, 0xff0000)
-            }
+            // }
         })
         /* * */
 

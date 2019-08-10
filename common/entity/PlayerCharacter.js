@@ -1,5 +1,4 @@
 import nengi from 'nengi'
-import WeaponSystem from '../WeaponSystem'
 import SAT from 'sat'
 
 class PlayerCharacter {
@@ -18,7 +17,7 @@ class PlayerCharacter {
 
         this.speed = 400
 
-        this.weaponSystem = new WeaponSystem()
+        // this.weaponSystem = new WeaponSystem()
 
         this.collider = new SAT.Circle(new SAT.Vector(this.x, this.y), 25)
     }
@@ -43,13 +42,13 @@ class PlayerCharacter {
         }
     }
 
-    fire() {
-        if (!this.isAlive) {
-            return false
-        }
+    // fire() {
+    //     if (!this.isAlive) {
+    //         return false
+    //     }
 
-        return this.weaponSystem.fire()
-    }
+    //     return this.weaponSystem.fire()
+    // }
 
     processMove(command) {
         if (!this.isAlive) {

@@ -1,15 +1,12 @@
 import nengi from 'nengi'
 import nengiConfig from '../common/nengiConfig'
 import PlayerCharacter from '../common/entity/PlayerCharacter'
-import GreenCircle from '../common/entity/GreenCircle'
 import Identity from '../common/message/Identity'
-import WeaponFired from '../common/message/WeaponFired'
-import CollisionSystem from '../common/CollisionSystem'
 
 class GameInstance {
     constructor() {
         this.entities = new Map()
-        this.collisionSystem = new CollisionSystem()
+        // this.collisionSystem = new CollisionSystem()
         this.instance = new nengi.Instance(nengiConfig, { port: 8079 })
         this.instance.onConnect((client, clientData, callback) => {
             //callback({ accepted: false, text: 'Connection denied.'})
@@ -46,20 +43,20 @@ class GameInstance {
         })
 
 
-        for (var i = 0; i < 0; i++) {
-            this.spawnGreenCircle()
-        }
+        // for (var i = 0; i < 0; i++) {
+        //     this.spawnGreenCircle()
+        // }
     }
 
-    spawnGreenCircle() {
-        const green = new GreenCircle(
-            Math.random() * 1000,
-            Math.random() * 1000
-        )
-        // Order is important for the next two lines
-        this.instance.addEntity(green) // assigns an `nid` to green
-        this.entities.set(green.nid, green) // uses the `nid` as a key
-    }
+    // spawnGreenCircle() {
+    //     const green = new GreenCircle(
+    //         Math.random() * 1000,
+    //         Math.random() * 1000
+    //     )
+    //     // Order is important for the next two lines
+    //     this.instance.addEntity(green) // assigns an `nid` to green
+    //     this.entities.set(green.nid, green) // uses the `nid` as a key
+    // }
 
     update(delta) {
         //console.log('stats', this.entities.size, this.instance.clients.toArray().length, this.instance.entities.toArray().length)
@@ -80,17 +77,17 @@ class GameInstance {
             }
         }
 
-        this.entities.forEach(entity => {
-            if (entity instanceof GreenCircle) {
-                if (!entity.isAlive) {
-                    // Order matters for the next 2 lines
-                    this.entities.delete(entity.nid)
-                    this.instance.removeEntity(entity)
-                    // respawn after one second
-                    setTimeout(() => { this.spawnGreenCircle() }, 1000)
-                }
-            }
-        })
+        // this.entities.forEach(entity => {
+        //     if (entity instanceof GreenCircle) {
+        //         if (!entity.isAlive) {
+        //             // Order matters for the next 2 lines
+        //             this.entities.delete(entity.nid)
+        //             this.instance.removeEntity(entity)
+        //             // respawn after one second
+        //             setTimeout(() => { this.spawnGreenCircle() }, 1000)
+        //         }
+        //     }
+        // })
 
         // TODO: the rest of the game logic
         this.instance.clients.forEach(client => {
@@ -98,7 +95,7 @@ class GameInstance {
             client.view.y = client.entity.y
 
             client.entity.move(delta)
-            client.entity.weaponSystem.update(delta)
+            // client.entity.weaponSystem.update(delta)
         })
 
         // when instance.updates, nengi sends out snapshots to every client
