@@ -1,8 +1,8 @@
 import nengi from 'nengi'
 
-import PlayerCharacter from './entity/PlayerCharacter'
-import Identity from './message/Identity'
-import MoveCommand from './command/MoveCommand'
+import PlayerCharacter from './entity/PlayerCharacter.js'
+import Identity from './message/Identity.js'
+import MoveCommand from './command/MoveCommand.js'
 
 const config = {
     UPDATE_RATE: 20, 

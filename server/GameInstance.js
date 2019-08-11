@@ -1,7 +1,7 @@
 import nengi from 'nengi'
-import nengiConfig from '../common/nengiConfig'
-import PlayerCharacter from '../common/entity/PlayerCharacter'
-import Identity from '../common/message/Identity'
+import nengiConfig from '../common/nengiConfig.js'
+import PlayerCharacter from '../common/entity/PlayerCharacter.js'
+import Identity from '../common/message/Identity.js'
 
 export default function createInstance() {
     const entities = new Map()
