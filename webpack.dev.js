@@ -6,8 +6,8 @@ module.exports = merge(common, {
     mode: 'development',
     devServer: {
         contentBase: path.join(__dirname, './public'),
-        publicPath: 'http://localhost:8080/js/',
+        publicPath: 'http://localhost:15000/js/',
         compress: true,
-        port: 8080
+        port: 15000
     }
 })
