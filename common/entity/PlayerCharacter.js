@@ -1,5 +1,4 @@
 import nengi from 'nengi'
-import SAT from 'sat'
 
 class PlayerCharacter {
     constructor() {
@@ -19,7 +18,7 @@ class PlayerCharacter {
 
         // this.weaponSystem = new WeaponSystem()
 
-        this.collider = new SAT.Circle(new SAT.Vector(this.x, this.y), 25)
+        // this.collider = new SAT.Circle(new SAT.Vector(this.x, this.y), 25)
     }
 
 
@@ -83,8 +82,8 @@ class PlayerCharacter {
         this.x += this.moveDirection.x * this.speed * delta
         this.y += this.moveDirection.y * this.speed * delta
 
-        this.collider.pos.x = this.x
-        this.collider.pos.y = this.y
+        // this.collider.pos.x = this.x
+        // this.collider.pos.y = this.y
     }
 }
 
