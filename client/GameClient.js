@@ -2,12 +2,12 @@ import nengi from 'nengi'
 import nengiConfig from '../common/nengiConfig'
 import { default as MoveCommand, UP, DOWN, LEFT, RIGHT, STOP } from '../common/command/MoveCommand'
 
-import { gridSheet } from 'pxcan';
+import { gridSheet, fill } from 'pxcan';
 
 const charaSrc = 'https://opengameart.org/sites/default/files/rpg_16x16_0.png';
 const playerSheet = gridSheet(charaSrc, 16, 16);
 
-export default function makeClient() {
+export default function view() {
     const client = new nengi.Client(nengiConfig)
     const stuff = {};
     let myId = null;
@@ -23,7 +23,7 @@ export default function makeClient() {
 
     client.connect('ws://localhost:8079')  
 
-    return function update(delta, { touches, buttons }) {
+    return function loop({ touches, buttons }) {
         /* receiving */
         const network = client.readNetwork()
 
@@ -77,7 +77,14 @@ export default function makeClient() {
         client.update()
         /* * */
 
-        return Object.values(stuff)
+        const guySprites = Object.values(stuff)
             .map(g => playerSheet.sprite(0).at(g.x*16, g.y*16));
+
+        return {
+            sprites: [
+                fill('gray'),
+                ...guySprites,
+            ]
+        }
     }
 }
