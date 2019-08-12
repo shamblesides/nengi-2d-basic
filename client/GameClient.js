@@ -1,6 +1,6 @@
 import nengi from 'nengi'
 import nengiConfig from '../common/nengiConfig'
-import MoveCommand from '../common/command/MoveCommand'
+import { default as MoveCommand, UP, DOWN, LEFT, RIGHT, STOP } from '../common/command/MoveCommand'
 
 import { gridSheet } from 'pxcan';
 
@@ -11,6 +11,7 @@ export default function makeClient() {
     const client = new nengi.Client(nengiConfig)
     const stuff = {};
     let myId = null;
+    let lastMove = null;
 
     client.onConnect(res => {
         console.log('onConnect response:', res)
@@ -56,29 +57,27 @@ export default function makeClient() {
         /* * */
 
         /* sending */
-        // const input = this.input.frameState
+        const me = stuff[myId];
+        
+        if (me) {
+            const dir =
+                buttons.up.pressed ? UP :
+                buttons.down.pressed ? DOWN :
+                buttons.left.pressed ? LEFT :
+                buttons.right.pressed ? RIGHT :
+                STOP;
 
-        let rotation = 0
-        // const worldCoord = this.renderer.toWorldCoordinates(, (touches[0] || {x:0}).y)
-
-        if (myId) {
-            // calculate the direction our character is facing
-            const dx = (touches[0] || {x:0}).x - 72;
-            const dy = (touches[0] || {y:0}).y - 72;
-            rotation = Math.atan2(dy, dx)
+            const args = [me.x, me.y, dir];
+            if (JSON.stringify(args) !== lastMove) {
+                lastMove = JSON.stringify(args);
+                client.addCommand(new MoveCommand(me.x, me.y, dir));
+            }
         }
 
-        client.addCommand(new MoveCommand(
-            buttons.up.pressed, buttons.left.pressed,
-            buttons.down.pressed, buttons.right.pressed,
-            rotation, delta
-        ))
-
-        // this.input.releaseKeys()
         client.update()
         /* * */
 
         return Object.values(stuff)
-            .map(g => playerSheet.sprite(0).at(g.x, g.y));
+            .map(g => playerSheet.sprite(0).at(g.x*16, g.y*16));
     }
 }

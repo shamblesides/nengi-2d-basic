@@ -1,98 +1,50 @@
 import nengi from 'nengi'
+import { default as MoveCommand, UP, DOWN, LEFT, RIGHT, STOP } from '../command/MoveCommand.js';
+
+const dxy = {
+    [UP]: [0,-1],
+    [DOWN]: [0,1],
+    [LEFT]: [-1,0],
+    [RIGHT]: [1,0],
+    [STOP]: [0,0],
+}
 
 class PlayerCharacter {
     constructor() {
         this.x = 0
         this.y = 0
-        this.rotation = 0
-        this.hitpoints = 100
-        this.isAlive = true
-
-
-        this.moveDirection = {
-            x: 0,
-            y: 0
-        }
-
-        this.speed = 400
-
-        // this.weaponSystem = new WeaponSystem()
-
-        // this.collider = new SAT.Circle(new SAT.Vector(this.x, this.y), 25)
+        this.lastDir = STOP;
+        this.nextCmd = null;
+        this.moveTime = 0;
     }
 
-
-    takeDamage(amount) {
-        if (this.isAlive) {
-            this.hitpoints -= amount
-        }
-
-        if (this.hitpoints <= 0 && this.isAlive) {
-            this.hitpoints = 0
-            this.isAlive = false
-
-            // DEAD! come back to life and teleport to a new spot
-            setTimeout(() => {
-                this.hitpoints = 100
-                this.isAlive = 100
-                this.x = Math.random() * 500
-                this.y = Math.random() * 500
-            }, 1000)
-        }
+    processMove(/** @type{MoveCommand} */cmd) {
+        this.nextCmd = cmd;
     }
 
-    // fire() {
-    //     if (!this.isAlive) {
-    //         return false
-    //     }
-
-    //     return this.weaponSystem.fire()
-    // }
-
-    processMove(command) {
-        if (!this.isAlive) {
-            return
+    tick(delta) {
+        if (this.moveTime > 0) {
+            this.moveTime -= delta;
+        }
+        const cmd = this.nextCmd;
+        if (this.moveTime > 0 || !cmd || cmd.dir === STOP || !dxy[cmd.dir] || cmd.x !== this.x || cmd.y !== this.y) {
+            // console.log(cmd&&cmd.x, this.x, cmd&&cmd.y, this.y, cmd&&cmd.dir, this.moveTime)
+            return;
         }
 
-        this.rotation = command.rotation
-
-        let unitX = 0
-        let unitY = 0
-
-        // create forces from input
-        if (command.forward) { unitY -= 1 }
-        if (command.backward) { unitY += 1 }
-        if (command.left) { unitX -= 1 }
-        if (command.right) { unitX += 1 }
-
-        // normalize      
-        const len = Math.sqrt(unitX * unitX + unitY * unitY)
-        if (len > 0) {
-            unitX = unitX / len
-            unitY = unitY / len
-        }
-
-        this.moveDirection.x = unitX
-        this.moveDirection.y = unitY
-
-
-    }
-
-    move(delta) {
-        this.x += this.moveDirection.x * this.speed * delta
-        this.y += this.moveDirection.y * this.speed * delta
-
-        // this.collider.pos.x = this.x
-        // this.collider.pos.y = this.y
+        const [dx, dy] = dxy[cmd.dir];
+        this.x += dx;
+        this.y += dy;
+        this.lastDir = cmd.dir;
+        this.nextCmd = null;
+        this.moveTime = 1 / 60 * 16 / 1.5;
     }
 }
 
 PlayerCharacter.protocol = {
-    x: { type: nengi.Float32, interp: true },
-    y: { type: nengi.Float32, interp: true },
-    rotation: { type: nengi.RotationFloat32, interp: true },
-    isAlive: nengi.Boolean,
-    hitpoints: nengi.UInt8
+    x: nengi.UInt10,
+    y: nengi.UInt10,
+    fromDir: nengi.UInt3,
 }
 
 export default PlayerCharacter
